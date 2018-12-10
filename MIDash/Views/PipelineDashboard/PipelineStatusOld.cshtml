@@ -1,0 +1,17 @@
+﻿@model Dictionary<String, Dictionary<String, String>>
+
+@{
+    ViewBag.Title = "MI MEDM Dashboard";
+}
+<h2>@ViewBag.Title.</h2>
+<h3>@ViewBag.Message</h3>
+@{
+    foreach (var item in Model)
+    {
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;@item.Key--------------------------> Completed Successfully</p><br/>
+        foreach (var entry in item.Value)
+        {
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@entry.Key--------------------------> @entry.Value</p><br/>
+            }
+        }
+    }

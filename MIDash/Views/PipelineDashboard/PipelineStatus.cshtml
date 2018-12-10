@@ -1,0 +1,107 @@
+﻿@model List<MIDashboard.Models.PipelineDisplay>
+@functions{
+    String GetStatusMessage(Dictionary<String, String> value)
+    {
+        String StatusMessage = "Completed Successfully";
+        foreach (var entry in value)
+        {
+            if (entry.Value.Contains("FAILURE") || entry.Value.Contains("UNKNOWN")) {
+                StatusMessage = "Failed With Issues";
+                return StatusMessage;
+            }
+        }
+        return StatusMessage;
+    }
+    String GetStatusMessage(String key, Dictionary<String, String> value, Dictionary<String, Dictionary<String, Dictionary<String, String>>> InnerPrjDict)
+    {
+        String StatusMessage = "Completed Successfully";
+        if (key != "MiMedmGit_CiProd" && key != "MiMedmGit_CiEts")
+        {
+            if (InnerPrjDict != null && InnerPrjDict.ContainsKey(key))
+            {
+                foreach (var innerEntry in InnerPrjDict[key])
+                {
+                    foreach (var inner1 in innerEntry.Value)
+                    {
+                        if (inner1.Value.Contains("FAILURE") || inner1.Value.Contains("UNKNOWN"))
+                        {
+                            StatusMessage = "Failed With Issues";
+                            return StatusMessage;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return GetStatusMessage(value);
+            }
+        }
+        else
+        {
+            foreach (var innerEntry in InnerPrjDict)
+            {
+                foreach (var inner1 in innerEntry.Value)
+                {
+                    foreach (var inner2 in inner1.Value)
+                    {
+                        if (inner2.Value.Contains("FAILURE") || inner2.Value.Contains("UNKNOWN"))
+                        {
+                            StatusMessage = "Failed With Issues";
+                            return StatusMessage;
+                        }
+                    }
+                }
+
+            }
+        }
+        return StatusMessage;
+    }
+}
+        
+@{
+    ViewBag.Title = "";
+}
+<h2>@ViewBag.Message</h2>
+@{
+    foreach (var outer in Model)
+    {
+        if (outer.BldTypeDict != null)
+        {
+            foreach (var item in outer.BldTypeDict)
+            {
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;@item.Key-------------------------->@GetStatusMessage(item.Key, item.Value, outer.InnerPrjDict)</p><br/>
+                foreach (var entry in item.Value)
+                {
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@entry.Key--------------------------> @entry.Value</p><br/>
+                }
+            }
+        }
+        if (outer.PrjDict != null)
+        {
+            foreach (var prj in outer.PrjDict)
+            {
+            
+                foreach (var entry in prj.Value)
+                {
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@entry.Key-------------------------->@GetStatusMessage(entry.Key,entry.Value,outer.InnerPrjDict)</p><br />
+                    foreach (var inner in entry.Value)
+                    {
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@inner.Key--------------------------> @inner.Value</p><br />
+                    }
+                    if (outer.InnerPrjDict != null && outer.InnerPrjDict.ContainsKey(entry.Key))
+                    {
+                        foreach (var innerEntry in outer.InnerPrjDict[entry.Key])
+                        {
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@innerEntry.Key-------------------------->@GetStatusMessage(innerEntry.Value)</p><br />
+                            foreach (var inner1 in innerEntry.Value)
+                            {
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@inner1.Key--------------------------> @inner1.Value</p><br />
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
